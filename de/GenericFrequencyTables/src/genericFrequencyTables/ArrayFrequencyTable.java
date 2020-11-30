@@ -1,43 +1,65 @@
-package arrayFrequencyTable;
+package genericFrequencyTables;
 
-import linkedListFrequencyTable.AbstractFrequencyTable;
-import linkedListFrequencyTable.Word;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  *
  * @author Jan-Niclas Serr + Simon Warmers
  * @since 23.4.2020
  */
-public class ArrayFrequencyTable extends AbstractFrequencyTable {
+public class ArrayFrequencyTable<T> extends AbstractFrequencyTable<T> {
 	private int size;
-	private Word fqTable[];
+	private Word<T> fqTable[];
 	private final int DefaultSize = 100;
 
 	public ArrayFrequencyTable() {
-        clear();
-    }
+        this.clear();
+	}
 
     @Override
-    public Word[] getFqTable(){
+    public Word<T>[] getFqTable(){
 		return fqTable;
 	}
+
 	public int size(){
 		return size;
 	}
 
 
 	@Override
-	public final void clear() {
-		fqTable = new Word[DefaultSize];
-		size = 0;
+	public Iterator<Word<T>> iterator() {
+		return new ArrayFrequencyTableIterator();
 	}
 
+	private class ArrayFrequencyTableIterator implements Iterator<Word<T>>{
+		private int i = 0;
+		@Override
+		public boolean hasNext() {
+			return i <= size-1;
+		}
+
+		@Override
+		public Word<T> next() {
+			return fqTable[i++];
+		}
+	}
+
+
 	@Override
-	public void add(String w, int f) {
-		for (int i = 0; i < fqTable.length; i++) {
+	public final void clear() {
+		fqTable = new Word[DefaultSize];
+		this.size = 0;
+	}
+
+
+	@Override
+	public void add(T w, int f) {
+
+		for (int i = 0; i <= fqTable.length; i++) {
 			if (fqTable[i] == null){
 				resize();
-				fqTable[i] = new Word(w,f);
+				fqTable[i] = new Word<T>((T) w,f);
 				moveLeft(i);
 				size++;
 				return;
@@ -51,7 +73,7 @@ public class ArrayFrequencyTable extends AbstractFrequencyTable {
 	}
 
 	@Override
-	public Word get(int pos) {
+	public Word<T> get(int pos) {
 		if(pos >= size){
 			return null;
 		}
@@ -59,7 +81,7 @@ public class ArrayFrequencyTable extends AbstractFrequencyTable {
 	}
 
 	@Override
-	public int get(String w) {
+	public int get(Object w) {
 		for (int i = 0; i < size; i++) {
 			if (fqTable[i].getWord().equals(w)){
 				return fqTable[i].getFrequency();
@@ -68,9 +90,10 @@ public class ArrayFrequencyTable extends AbstractFrequencyTable {
 		return 0;
 	}
 
+
 	private void resize(){
 		if (size==fqTable.length-1) {
-			Word[] oldfqTable = fqTable;
+			Word<T>[] oldfqTable = fqTable;
 			fqTable = new Word[oldfqTable.length * 2];
 			System.arraycopy(oldfqTable, 0, fqTable, 0, size);
 		}
@@ -81,7 +104,7 @@ public class ArrayFrequencyTable extends AbstractFrequencyTable {
 			return;
 		}
 		while (fqTable[i-1].getFrequency() < fqTable[i].getFrequency()){
-			Word temp = fqTable[i - 1];
+			Word<T> temp = fqTable[i - 1];
 			fqTable[i - 1] = fqTable[i];
 			fqTable[i] = temp;
 			i--;
@@ -89,18 +112,6 @@ public class ArrayFrequencyTable extends AbstractFrequencyTable {
 				break;
 			}
 		}
-		if (i==0){
-			return;
-		}
-		while (fqTable[i-1].getFrequency() == fqTable[i].getFrequency() &&
-				fqTable[i-1].getWord().compareToIgnoreCase(fqTable[i].getWord()) > 0){
-			Word temp = fqTable[i-1];
-			fqTable[i-1] = fqTable[i];
-			fqTable[i] = temp;
-			i--;
-			if(i==0){
-				break;
-			}
-		}
+
 	}
 }
